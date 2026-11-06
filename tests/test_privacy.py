@@ -20,3 +20,9 @@ def test_no_personal_identifiers_in_bundled_corpus() -> None:
 def test_sources_lists_exactly_the_bundled_files() -> None:
     listed = set(re.findall(r"BOE-A-\d{4}-\d+", (DATA / "SOURCES.md").read_text(encoding="utf-8")))
     assert listed == {p.stem for p in DATA.glob("*.xml")}
+
+
+def test_no_personal_identifiers_in_tender_report() -> None:
+    text = (DATA / "tenders" / "triage_report.json").read_text(encoding="utf-8")
+    for name, pat in PATTERNS.items():
+        assert not pat.search(text), name

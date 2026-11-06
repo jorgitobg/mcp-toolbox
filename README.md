@@ -4,10 +4,11 @@ A small, tested [MCP](https://modelcontextprotocol.io) server that lets an AI cl
 
 ## Current status (v0.1)
 
-One server, two read-only tools, stdio transport, built on the official Python SDK (`mcp>=1.12,<2`):
+One server, three read-only tools, stdio transport, built on the official Python SDK (`mcp>=1.12,<2`):
 
 - `search_boe(query, limit=5)`: ranked keyword search (accent-insensitive, title matches weigh 3x) with snippets and source URLs.
 - `get_boe_document(doc_id)`: metadata and paragraphs of one document; unknown ids return an MCP tool error.
+- `triage_tenders(verdict=None, query=None, limit=10)`: lists the recorded [open-tender-radar](https://github.com/jorgitobg/open-tender-radar) report (10 public TED/PLACSP tenders screened against a fictional profile on 2026-11-04) with GO / REVIEW / NO_GO and per-criterion evidence. Rule-based screening, not bid advice; evidence like "days left" is frozen at the recording date. Provenance in `src/mcp_toolbox/data/tenders/SOURCES.md`.
 
 Data: 11 recorded BOE documents (BOE of 2026-11-03) bundled in the package. No network, keys or LLM at runtime or in tests.
 
@@ -37,7 +38,14 @@ search_boe('plazas Subalterno Ayuntamiento'): 3 result(s)
   BOE-A-2026-23041 score=8 Resolución de 28 de octubre de 2026, del Ayuntamiento de Torrox (Málaga), referente a la c
   BOE-A-2026-23049 score=8 Resolución de 29 de octubre de 2026, del Ayuntamiento de Borriana/Burriana (Castellón/Cast
   BOE-A-2026-23045 score=7 Resolución de 29 de octubre de 2026, del Ayuntamiento de Tarragona, Instituto Municipal de
-get_boe_document(BOE-A-2026-23041): 6 paragraphs, https://www.boe.es/diario_boe/xml.php?id=BOE-A-2026-23041```
+get_boe_document(BOE-A-2026-23041): 6 paragraphs, https://www.boe.es/diario_boe/xml.php?id=BOE-A-2026-23041
+triage_tenders(verdict='GO'): 1 of 10 matched
+  [GO] PLACSP:412026 Servicios de operación del Centro de Operaciones de Segurida
+    cpv       pass    CPV 72222300 within profile
+    deadline  pass    7 days left
+    keywords  unknown no profile keyword in title
+    value     pass    206,612 EUR within limits
+```
 
 ## Layout
 
@@ -46,7 +54,7 @@ Hexagonal: `domain/` (models, `DocumentSource` port), `application/search.py`, `
 ## Limitations
 
 - Keyword counting only: no stemming, phrases or semantics.
-- Static snapshot of 11 documents; no live BOE or TED access yet.
+- Static snapshots (11 BOE documents, one tender report); no live BOE, TED or PLACSP access, and the tender report is a copy, not a live call into open-tender-radar.
 - stdio only; no HTTP transport or auth.
 - `mcp` 2.x is not supported yet (API renamed); pinned below 2.
 

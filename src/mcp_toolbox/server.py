@@ -8,6 +8,7 @@ from mcp.server.fastmcp import FastMCP
 
 from mcp_toolbox.adapters.fixture_corpus import DirectoryCorpus
 from mcp_toolbox.application.search import BoeSearch
+from mcp_toolbox.application.triage import TenderTriage
 from mcp_toolbox.domain.models import BoeDocument
 
 MAX_LIMIT = 20
@@ -23,8 +24,9 @@ def _summary(doc: BoeDocument) -> dict[str, Any]:
     }
 
 
-def build_server(search: BoeSearch | None = None) -> FastMCP:
+def build_server(search: BoeSearch | None = None, triage: TenderTriage | None = None) -> FastMCP:
     engine = search or BoeSearch(DirectoryCorpus())
+    tenders = triage or TenderTriage()
     mcp = FastMCP("mcp-toolbox", log_level="WARNING")
 
     @mcp.tool()
@@ -44,6 +46,18 @@ def build_server(search: BoeSearch | None = None) -> FastMCP:
         if doc is None:
             raise ValueError(f"unknown document id: {doc_id!r}")
         return {**_summary(doc), "paragraphs": list(doc.paragraphs)}
+
+    @mcp.tool()
+    def triage_tenders(  # pyright: ignore[reportUnusedFunction]
+        verdict: str | None = None, query: str | None = None, limit: int = 10
+    ) -> dict[str, Any]:
+        """List recorded TED/PLACSP tenders screened against a fictional profile.
+
+        Rule-based GO / REVIEW / NO_GO with per-criterion evidence (open-tender-radar report,
+        recorded 2026-11-04). Optional verdict filter and keyword query. Offline, read-only.
+        """
+        rows = tenders.select(verdict, query, min(max(limit, 1), MAX_LIMIT))
+        return {"summary": tenders.summary, "count": len(rows), "tenders": rows}
 
     return mcp
 

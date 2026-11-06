@@ -1,0 +1,264 @@
+{
+  "summary": {
+    "matched": 10,
+    "parsed": 11,
+    "skipped": 0,
+    "verdicts": {
+      "GO": 1,
+      "NO_GO": 7,
+      "REVIEW": 2
+    }
+  },
+  "tenders": [
+    {
+      "buyer": "Presidencia y Dirección de Administración y Finanzas de la de la Sociedad Mercantil Estatal para la Gestión de la Innovación y las Tecnologías Turísticas, S.A.M.P. (SEGITTUR)",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 72222300 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "7 days left",
+          "outcome": "pass"
+        },
+        "keywords": {
+          "evidence": "no profile keyword in title",
+          "outcome": "unknown"
+        },
+        "value": {
+          "evidence": "206,612 EUR within limits",
+          "outcome": "pass"
+        }
+      },
+      "id": "412026",
+      "source": "PLACSP",
+      "title": "Servicios de operación del Centro de Operaciones de Seguridad SOC. Las necesidades a satisfacer se especifican con mayor detalle en el PLIEGO DE PRESCRIPCIONES TÉCNICAS QUE RIGE LA CONTRATACIÓN",
+      "verdict": "GO"
+    },
+    {
+      "buyer": "Alcaldía del Ayuntamiento de Gijón",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 48800000, 72000000 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "no submission deadline published",
+          "outcome": "unknown"
+        },
+        "keywords": {
+          "evidence": "keywords: datos",
+          "outcome": "pass"
+        },
+        "value": {
+          "evidence": "estimated value not published",
+          "outcome": "unknown"
+        }
+      },
+      "id": "674568-2026",
+      "source": "TED",
+      "title": "España – Sistemas y servidores de información – Suministro de dos servidores en régimen de alquiler para la base de datos corporativa y operación de primer nivel de los sistemas y base de datos, por procedimiento abierto, sujeto a regulación armonizada, con varios criterios de adjudicación",
+      "verdict": "REVIEW"
+    },
+    {
+      "buyer": "Gerencia de la Empresa Mancomunada del Aljarafe, S.A. (ALJARAFESA)",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 72320000 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "no submission deadline published",
+          "outcome": "unknown"
+        },
+        "keywords": {
+          "evidence": "keywords: datos",
+          "outcome": "pass"
+        },
+        "value": {
+          "evidence": "estimated value not published",
+          "outcome": "unknown"
+        }
+      },
+      "id": "674694-2026",
+      "source": "TED",
+      "title": "España – Servicios relacionados con bases de datos – Servicio de administración de base de datos Progress",
+      "verdict": "REVIEW"
+    },
+    {
+      "buyer": "Dirección General de la Entidad Pública Empresarial RED.ES",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 72246000, 72900000 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "-34 days left, need at least 7",
+          "outcome": "fail"
+        },
+        "keywords": {
+          "evidence": "keywords: ciberamenazas",
+          "outcome": "pass"
+        },
+        "value": {
+          "evidence": "274,965 EUR within limits",
+          "outcome": "pass"
+        }
+      },
+      "id": "017/26-SI",
+      "source": "PLACSP",
+      "title": "Servicio de análisis de ciberamenazas y gestión de riesgos del registro del CCTLD .ES",
+      "verdict": "NO_GO"
+    },
+    {
+      "buyer": "Secretaría General de la Consejería de Hacienda, Administraciones Públicas y Transformación Digital de la Junta de Comunidades de Castilla-La Mancha",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 72000000 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "-77 days left, need at least 7",
+          "outcome": "fail"
+        },
+        "keywords": {
+          "evidence": "keywords: datos",
+          "outcome": "pass"
+        },
+        "value": {
+          "evidence": "828,785 EUR within limits",
+          "outcome": "pass"
+        }
+      },
+      "id": "2026/031503",
+      "source": "PLACSP",
+      "title": "Portal Datos Abiertos de Castilla-La Mancha",
+      "verdict": "NO_GO"
+    },
+    {
+      "buyer": "Consorcio Universitario del Centro Asociado a la UNED en Ourense",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 72267000 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "7 days left",
+          "outcome": "pass"
+        },
+        "keywords": {
+          "evidence": "keywords: software",
+          "outcome": "pass"
+        },
+        "value": {
+          "evidence": "11,824 EUR below minimum 20,000",
+          "outcome": "fail"
+        }
+      },
+      "id": "2027/001/PNSP",
+      "source": "PLACSP",
+      "title": "Contrato de servicios de mantenimiento integral, correctivo y evolutivo de software de contabilidad y gestión APLINED",
+      "verdict": "NO_GO"
+    },
+    {
+      "buyer": "Rectorado de la Universidad de les Illes Balears",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 72000000, 72212610, 72262000, 72263000 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "-68 days left, need at least 7",
+          "outcome": "fail"
+        },
+        "keywords": {
+          "evidence": "no profile keyword in title",
+          "outcome": "unknown"
+        },
+        "value": {
+          "evidence": "206,612 EUR within limits",
+          "outcome": "pass"
+        }
+      },
+      "id": "21/26",
+      "source": "PLACSP",
+      "title": "Servicio de implantación de una factoría de información para la Universidad de las Illes Balears",
+      "verdict": "NO_GO"
+    },
+    {
+      "buyer": "IZFE - Sociedad Foral de Servicios Informáticos - IZFE - Sociedad Foral de Servicios Informáticos",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 48000000, 72267000 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "-5 days left, need at least 7",
+          "outcome": "fail"
+        },
+        "keywords": {
+          "evidence": "keywords: software",
+          "outcome": "pass"
+        },
+        "value": {
+          "evidence": "estimated value not published",
+          "outcome": "unknown"
+        }
+      },
+      "id": "674346-2026",
+      "source": "TED",
+      "title": "España – Paquetes de software y sistemas de información – Suministro de Licencias de Citrix y Control UP, soporte y mantenimiento",
+      "verdict": "NO_GO"
+    },
+    {
+      "buyer": "Presidencia de Turisme Comunitat Valenciana",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 48000000, 72514300 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "0 days left, need at least 7",
+          "outcome": "fail"
+        },
+        "keywords": {
+          "evidence": "keywords: datos",
+          "outcome": "pass"
+        },
+        "value": {
+          "evidence": "estimated value not published",
+          "outcome": "unknown"
+        }
+      },
+      "id": "674551-2026",
+      "source": "TED",
+      "title": "España – Servicios de gestión de instalaciones para el mantenimiento de sistemas informáticos – Migración y puesta en servicio de recursos tecnológicos de Turisme Comunitat Valenciana hacia un Centro de Procesamiento de Datos (CPD) externo gestionado, operado en modalidad de Infraestructura como Servicio (IaaS), incluyendo transición de máquinas virtuales, repositorios de almacenamiento, sistemas de copia de seguridad y comunicaciones necesarias para su integración en el nuevo entorno.",
+      "verdict": "NO_GO"
+    },
+    {
+      "buyer": "Rectorado de la Universidad Autónoma de Madrid",
+      "criteria": {
+        "cpv": {
+          "evidence": "CPV 72222300 within profile",
+          "outcome": "pass"
+        },
+        "deadline": {
+          "evidence": "-5 days left, need at least 7",
+          "outcome": "fail"
+        },
+        "keywords": {
+          "evidence": "keywords: datos",
+          "outcome": "pass"
+        },
+        "value": {
+          "evidence": "4,555,282 EUR above maximum 1,000,000",
+          "outcome": "fail"
+        }
+      },
+      "id": "674630-2026",
+      "source": "TED",
+      "title": "España – Mantenimiento y reparación de equipos de redes de datos – Servicio de mantenimiento de la electrónica de la red cableada y de la infraestructura de ciberseguridad de la Universidad Autónoma de Madrid.",
+      "verdict": "NO_GO"
+    }
+  ]
+}
