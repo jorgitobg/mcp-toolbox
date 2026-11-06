@@ -21,12 +21,12 @@ async def _call(session: ClientSession, name: str, args: dict[str, Any]) -> Any:
     return res, json.loads(res.content[0].text) if not res.isError else None  # type: ignore[union-attr]
 
 
-async def test_handshake_lists_two_read_only_tools() -> None:
+async def test_handshake_lists_three_read_only_tools() -> None:
     async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
         init = await session.initialize()
         assert init.serverInfo.name == "mcp-toolbox"
         tools = {t.name: t for t in (await session.list_tools()).tools}
-        assert set(tools) == {"search_boe", "get_boe_document"}
+        assert set(tools) == {"search_boe", "get_boe_document", "triage_tenders"}
         assert "query" in tools["search_boe"].inputSchema["properties"]
 
 
@@ -59,14 +59,18 @@ async def test_limit_is_clamped() -> None:
 
 async def test_in_process_server_builds() -> None:
     server = build_server()
-    assert {t.name for t in await server.list_tools()} == {"search_boe", "get_boe_document"}
+    assert {t.name for t in await server.list_tools()} == {
+        "search_boe",
+        "get_boe_document",
+        "triage_tenders",
+    }
 
 
 async def test_demo_output_is_deterministic() -> None:
     a = await demo.run()
     b = await demo.run()
     assert a == b
-    assert a[0] == "tools: get_boe_document, search_boe"
+    assert a[0] == "tools: get_boe_document, search_boe, triage_tenders"
     assert "BOE-A-2026-23041" in a[2]
 
 
@@ -75,4 +79,28 @@ async def test_invalid_arguments_rejected(bad: dict[str, Any]) -> None:
     async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
         await session.initialize()
         res = await session.call_tool("search_boe", bad)
+        assert res.isError
+
+
+async def test_triage_tenders_over_stdio() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        await session.initialize()
+        names = {t.name for t in (await session.list_tools()).tools}
+        assert "triage_tenders" in names
+        _, data = await _call(session, "triage_tenders", {})
+        assert data["summary"]["verdicts"] == {"GO": 1, "NO_GO": 7, "REVIEW": 2}
+        assert data["count"] == 10
+        _, go = await _call(session, "triage_tenders", {"verdict": "go"})
+        assert [t["id"] for t in go["tenders"]] == ["412026"]
+        assert go["tenders"][0]["criteria"]["cpv"]["outcome"] == "pass"
+        _, q = await _call(session, "triage_tenders", {"query": "SERVIDORES informacion"})
+        assert q["count"] >= 1 and all(t["verdict"] for t in q["tenders"])
+        _, one = await _call(session, "triage_tenders", {"limit": 1})
+        assert one["count"] == 1
+
+
+async def test_triage_rejects_unknown_verdict() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        await session.initialize()
+        res, _ = await _call(session, "triage_tenders", {"verdict": "MAYBE"})
         assert res.isError

@@ -29,6 +29,16 @@ async def run(query: str = QUERY) -> list[str]:
             doc = await session.call_tool("get_boe_document", {"doc_id": top})
             d = json.loads(doc.content[0].text)  # type: ignore[union-attr]
             lines.append(f"get_boe_document({top}): {len(d['paragraphs'])} paragraphs, {d['url']}")
+        tri = await session.call_tool("triage_tenders", {"verdict": "GO"})
+        t = json.loads(tri.content[0].text)  # type: ignore[union-attr]
+        lines.append(
+            f"triage_tenders(verdict='GO'): {t['count']} of {t['summary']['matched']} matched"
+        )
+        for row in t["tenders"]:
+            lines.append(f"  [{row['verdict']}] {row['source']}:{row['id']} {row['title'][:60]}")
+            lines.extend(
+                f"    {k:<9} {v['outcome']:<7} {v['evidence']}" for k, v in row["criteria"].items()
+            )
     return lines
 
 
