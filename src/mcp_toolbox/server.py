@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -58,6 +59,20 @@ def build_server(search: BoeSearch | None = None, triage: TenderTriage | None = 
         """
         rows = tenders.select(verdict, query, min(max(limit, 1), MAX_LIMIT))
         return {"summary": tenders.summary, "count": len(rows), "tenders": rows}
+
+    @mcp.resource("boe://index", mime_type="application/json")
+    def boe_index() -> str:  # pyright: ignore[reportUnusedFunction]
+        """Index of every bundled BOE document (id, title, department, date, URL)."""
+        docs = [_summary(d) for d in engine.all()]
+        return json.dumps({"count": len(docs), "documents": docs}, ensure_ascii=False)
+
+    @mcp.resource("boe://document/{doc_id}", mime_type="application/json")
+    def boe_document(doc_id: str) -> str:  # pyright: ignore[reportUnusedFunction]
+        """One bundled BOE document (metadata + paragraphs), readable without a tool call."""
+        doc = engine.get(doc_id)
+        if doc is None:
+            raise ValueError(f"unknown document id: {doc_id!r}")
+        return json.dumps({**_summary(doc), "paragraphs": list(doc.paragraphs)}, ensure_ascii=False)
 
     return mcp
 
