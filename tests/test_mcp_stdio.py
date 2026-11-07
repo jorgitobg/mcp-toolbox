@@ -7,6 +7,8 @@ from typing import Any
 import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from mcp.shared.exceptions import McpError
+from pydantic import AnyUrl
 
 from mcp_toolbox import demo
 from mcp_toolbox.server import build_server
@@ -104,3 +106,32 @@ async def test_triage_rejects_unknown_verdict() -> None:
         await session.initialize()
         res, _ = await _call(session, "triage_tenders", {"verdict": "MAYBE"})
         assert res.isError
+
+
+async def test_resources_list_and_read_over_stdio() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        init = await session.initialize()
+        assert init.capabilities.resources is not None
+        listed = (await session.list_resources()).resources
+        assert [str(x.uri) for x in listed] == ["boe://index"]
+        templates = (await session.list_resource_templates()).resourceTemplates
+        assert [t.uriTemplate for t in templates] == ["boe://document/{doc_id}"]
+
+        index = await session.read_resource(AnyUrl("boe://index"))
+        data = json.loads(index.contents[0].text)  # type: ignore[union-attr]
+        assert data["count"] == 11 == len(data["documents"])
+        ids = [d["id"] for d in data["documents"]]
+        assert ids == sorted(ids)
+
+        doc = await session.read_resource(AnyUrl("boe://document/BOE-A-2026-23041"))
+        body = json.loads(doc.contents[0].text)  # type: ignore[union-attr]
+        assert body["id"] == "BOE-A-2026-23041" and body["paragraphs"]
+        _, via_tool = await _call(session, "get_boe_document", {"doc_id": "BOE-A-2026-23041"})
+        assert body == via_tool
+
+
+async def test_unknown_resource_document_is_an_error() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        await session.initialize()
+        with pytest.raises(McpError):
+            await session.read_resource(AnyUrl("boe://document/nope"))

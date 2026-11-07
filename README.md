@@ -4,7 +4,7 @@ A small, tested [MCP](https://modelcontextprotocol.io) server that lets an AI cl
 
 ## Current status (v0.1)
 
-One server, three read-only tools, stdio transport, built on the official Python SDK (`mcp>=1.12,<2`):
+One server, three read-only tools and two resources, stdio transport, built on the official Python SDK (`mcp>=1.12,<2`):
 
 - `search_boe(query, limit=5)`: ranked keyword search (accent-insensitive, title matches weigh 3x) with snippets and source URLs.
 - `get_boe_document(doc_id)`: metadata and paragraphs of one document; unknown ids return an MCP tool error.
@@ -25,6 +25,23 @@ mcp-toolbox-demo        # or: python -m mcp_toolbox.demo
 ```
 
 Use it from an MCP client by launching `python -m mcp_toolbox` (or `mcp-toolbox`) over stdio.
+
+### Configure a desktop MCP client
+
+Most desktop clients read a JSON file with an `mcpServers` map (the file location depends on the client). Point `command` at the Python of the virtualenv where you ran `pip install -e .` (use an absolute path):
+
+```json
+{
+  "mcpServers": {
+    "mcp-toolbox": {
+      "command": "/absolute/path/to/mcp-toolbox/.venv/bin/python",
+      "args": ["-m", "mcp_toolbox"]
+    }
+  }
+}
+```
+
+Besides the three tools, the server exposes two read-only **resources** that a client can attach to a conversation without a tool call: `boe://index` (all bundled documents) and `boe://document/{doc_id}` (one document, same payload as `get_boe_document`). This snippet follows the common client convention and was not tested against a specific desktop client here; the server itself is exercised by the test-suite with the official Python MCP client over stdio.
 
 Development: `pip install -e '.[dev]'`, then `ruff check . && ruff format --check . && pyright && pytest` (coverage gate 85%). Only editable installs are exercised.
 
@@ -56,7 +73,7 @@ Hexagonal: `domain/` (models, `DocumentSource` port), `application/search.py`, `
 - Keyword counting only: no stemming, phrases or semantics.
 - Static snapshots (11 BOE documents, one tender report); no live BOE, TED or PLACSP access, and the tender report is a copy, not a live call into open-tender-radar.
 - stdio only; no HTTP transport or auth.
-- `mcp` 2.x is not supported yet (API renamed); pinned below 2.
+- `mcp` 2.x is not supported yet (API renamed); pinned below 2. A throwaway run of the tests against 2.3.0 passed after mechanical renames, see [ADR 0003](docs/adr/0003-mcp-2x-migration-evaluation.md).
 
 ## Licence
 

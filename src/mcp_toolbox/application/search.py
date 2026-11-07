@@ -68,3 +68,7 @@ class BoeSearch:
 
     def get(self, doc_id: str) -> BoeDocument | None:
         return next((d for d in self._docs if d.id == doc_id), None)
+
+    def all(self) -> tuple[BoeDocument, ...]:
+        """Every bundled document, ordered by id."""
+        return tuple(sorted(self._docs, key=lambda d: d.id))

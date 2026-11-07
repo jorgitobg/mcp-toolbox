@@ -19,5 +19,11 @@ Corpus: 11 BOE disposition XML documents bundled in `src/mcp_toolbox/data/` (pro
 - Given invalid arguments (missing or mistyped `query`), then the call is rejected with a tool error.
 - The bundled corpus contains no emails, ID numbers, phones or IBANs (enforced by tests).
 
+## US5: Resources
+- Given a client that supports resources, when it lists them, then `boe://index` is listed and `boe://document/{doc_id}` is advertised as a template.
+- Given `boe://index`, when read, then it returns every bundled document's metadata ordered by id (count 11).
+- Given `boe://document/<id>`, when read, then the payload equals the `get_boe_document` result for the same id.
+- Given an unknown id, then reading fails with a protocol error, not a crash.
+
 ## Non-goals (v0.1)
 No semantic search, no live BOE/TED access, no write tools, no HTTP transport.
