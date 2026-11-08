@@ -74,6 +74,22 @@ def build_server(search: BoeSearch | None = None, triage: TenderTriage | None = 
             raise ValueError(f"unknown document id: {doc_id!r}")
         return json.dumps({**_summary(doc), "paragraphs": list(doc.paragraphs)}, ensure_ascii=False)
 
+    @mcp.prompt(title="Summarise a BOE document")
+    def summarise_boe_document(doc_id: str, audience: str = "a non-lawyer") -> str:  # pyright: ignore[reportUnusedFunction]
+        """Prompt template: summarise one bundled BOE document for a given audience."""
+        doc = engine.get(doc_id)
+        if doc is None:
+            raise ValueError(f"unknown document id: {doc_id!r}")
+        body = "\n\n".join(f"[{i}] {p}" for i, p in enumerate(doc.paragraphs, 1))
+        return (
+            f"Summarise the official BOE document below for {audience}.\n"
+            "Rules: use only the text provided, cite paragraph numbers like [2], "
+            "and say explicitly when the text does not answer something.\n"
+            "Structure: one-sentence gist, key facts (who, what, dates, deadlines), "
+            "open questions.\n\n"
+            f"Title: {doc.title}\nDepartment: {doc.department}\nSource: {doc.url}\n\n{body}"
+        )
+
     return mcp
 
 

@@ -135,3 +135,29 @@ async def test_unknown_resource_document_is_an_error() -> None:
         await session.initialize()
         with pytest.raises(McpError):
             await session.read_resource(AnyUrl("boe://document/nope"))
+
+
+async def test_prompt_listed_and_rendered_over_stdio() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        init = await session.initialize()
+        assert init.capabilities.prompts is not None
+        prompts = (await session.list_prompts()).prompts
+        assert [p.name for p in prompts] == ["summarise_boe_document"]
+        assert {a.name: a.required for a in prompts[0].arguments or []} == {
+            "doc_id": True,
+            "audience": False,
+        }
+        got = await session.get_prompt(
+            "summarise_boe_document", {"doc_id": "BOE-A-2026-23041", "audience": "a mayor"}
+        )
+        text = got.messages[0].content.text  # type: ignore[union-attr]
+        assert got.messages[0].role == "user"
+        assert "for a mayor" in text and "Torrox" in text and "[1] " in text
+        assert "https://www.boe.es/" in text
+
+
+async def test_prompt_unknown_document_is_an_error() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        await session.initialize()
+        with pytest.raises(McpError):
+            await session.get_prompt("summarise_boe_document", {"doc_id": "nope"})
