@@ -4,7 +4,7 @@ A small, tested [MCP](https://modelcontextprotocol.io) server that lets an AI cl
 
 ## Current status (v0.1)
 
-One server, three read-only tools, two resources and one prompt, stdio transport, built on the official Python SDK (`mcp>=1.12,<2`):
+One server, three read-only tools, four resources (two of them templates) and one prompt, stdio transport, built on the official Python SDK (`mcp>=1.12,<2`):
 
 - `search_boe(query, limit=5)`: ranked keyword search (accent-insensitive, title matches weigh 3x) with snippets and source URLs.
 - `get_boe_document(doc_id)`: metadata and paragraphs of one document; unknown ids return an MCP tool error.
@@ -43,7 +43,7 @@ Most desktop clients read a JSON file with an `mcpServers` map (the file locatio
 }
 ```
 
-Besides the three tools, the server exposes two read-only **resources** that a client can attach to a conversation without a tool call: `boe://index` (all bundled documents) and `boe://document/{doc_id}` (one document, same payload as `get_boe_document`). This snippet follows the common client convention and was not tested against a specific desktop client here; the server itself is exercised by the test-suite with the official Python MCP client over stdio.
+Besides the three tools, the server exposes read-only **resources** that a client can attach to a conversation without a tool call: `boe://index` (all bundled documents), `boe://document/{doc_id}` (one document, same payload as `get_boe_document`), `tenders://report` (the whole recorded tender report) and `tenders://report/{verdict}` (GO, REVIEW or NO_GO; same payload as `triage_tenders`). No subscriptions: the data are static snapshots. This snippet follows the common client convention and was not tested against a specific desktop client here; the server itself is exercised by the test-suite with the official Python MCP client over stdio.
 
 Development: `pip install -e '.[dev]'`, then `ruff check . && ruff format --check . && pyright && pytest` (coverage gate 85%). Only editable installs are exercised.
 

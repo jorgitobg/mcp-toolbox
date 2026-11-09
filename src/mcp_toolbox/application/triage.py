@@ -22,6 +22,9 @@ class TenderTriage:
         self.summary: dict[str, Any] = data["summary"]
         self._tenders: tuple[dict[str, Any], ...] = tuple(data["tenders"])
 
+    def all(self) -> tuple[dict[str, Any], ...]:
+        return self._tenders
+
     def select(self, verdict: str | None, query: str | None, limit: int) -> list[dict[str, Any]]:
         if verdict is not None and verdict.upper() not in VERDICTS:
             raise ValueError(f"verdict must be one of {', '.join(VERDICTS)}")
