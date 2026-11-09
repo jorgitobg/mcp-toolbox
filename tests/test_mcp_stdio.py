@@ -2,7 +2,7 @@
 
 import json
 import sys
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from mcp import ClientSession, StdioServerParameters
@@ -23,12 +23,12 @@ async def _call(session: ClientSession, name: str, args: dict[str, Any]) -> Any:
     return res, json.loads(res.content[0].text) if not res.isError else None  # type: ignore[union-attr]
 
 
-async def test_handshake_lists_three_read_only_tools() -> None:
+async def test_handshake_lists_four_read_only_tools() -> None:
     async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
         init = await session.initialize()
         assert init.serverInfo.name == "mcp-toolbox"
         tools = {t.name: t for t in (await session.list_tools()).tools}
-        assert set(tools) == {"search_boe", "get_boe_document", "triage_tenders"}
+        assert set(tools) == {"search_boe", "get_boe_document", "triage_tenders", "get_tender"}
         assert "query" in tools["search_boe"].inputSchema["properties"]
 
 
@@ -65,6 +65,7 @@ async def test_in_process_server_builds() -> None:
         "search_boe",
         "get_boe_document",
         "triage_tenders",
+        "get_tender",
     }
 
 
@@ -72,7 +73,7 @@ async def test_demo_output_is_deterministic() -> None:
     a = await demo.run()
     b = await demo.run()
     assert a == b
-    assert a[0] == "tools: get_boe_document, search_boe, triage_tenders"
+    assert a[0] == "tools: get_boe_document, get_tender, search_boe, triage_tenders"
     assert "BOE-A-2026-23041" in a[2]
 
 
@@ -118,6 +119,7 @@ async def test_resources_list_and_read_over_stdio() -> None:
         assert [t.uriTemplate for t in templates] == [
             "boe://document/{doc_id}",
             "tenders://report/{verdict}",
+            "tenders://tender/{tender_id}",
         ]
 
         index = await session.read_resource(AnyUrl("boe://index"))
@@ -185,3 +187,42 @@ async def test_prompt_unknown_document_is_an_error() -> None:
         await session.initialize()
         with pytest.raises(McpError):
             await session.get_prompt("summarise_boe_document", {"doc_id": "nope"})
+
+
+async def test_get_tender_and_resource_agree() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        await session.initialize()
+        _, listing = await _call(session, "triage_tenders", {"limit": 20})
+        first = listing["tenders"][0]
+        _, one = await _call(session, "get_tender", {"tender_id": first["id"]})
+        assert one == first
+        _, prefixed = await _call(
+            session, "get_tender", {"tender_id": f"{first['source'].lower()}:{first['id']}"}
+        )
+        assert prefixed == first
+        res = await session.read_resource(AnyUrl(f"tenders://tender/{first['id']}"))
+        assert json.loads(res.contents[0].text) == first  # type: ignore[union-attr]
+
+
+async def test_get_tender_unknown_or_wrong_source_is_an_error() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        await session.initialize()
+        res, _ = await _call(session, "get_tender", {"tender_id": "nope"})
+        assert res.isError
+        res, _ = await _call(session, "get_tender", {"tender_id": "TED:412026"})
+        assert res.isError
+        with pytest.raises(McpError):
+            await session.read_resource(AnyUrl("tenders://tender/nope"))
+
+
+async def test_get_tender_in_process() -> None:
+    server = build_server()
+    _, raw = await server.call_tool("get_tender", {"tender_id": "PLACSP:412026"})
+    out: dict[str, Any] = cast("dict[str, Any]", raw)
+    assert out["id"] == "412026" and out["verdict"] == "GO"
+    with pytest.raises(Exception, match="unknown tender id"):
+        await server.call_tool("get_tender", {"tender_id": "nope"})
+    body = list(await server.read_resource("tenders://tender/412026"))
+    assert json.loads(body[0].content)["id"] == "412026"
+    with pytest.raises(Exception, match="unknown tender id"):
+        await server.read_resource("tenders://tender/nope")

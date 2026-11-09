@@ -25,6 +25,14 @@ class TenderTriage:
     def all(self) -> tuple[dict[str, Any], ...]:
         return self._tenders
 
+    def get(self, tender_id: str) -> dict[str, Any] | None:
+        """Look up one tender by id; an optional ``SOURCE:`` prefix (TED, PLACSP) disambiguates."""
+        source, _, ident = tender_id.rpartition(":")
+        for t in self._tenders:
+            if t["id"] == ident and (not source or t["source"].casefold() == source.casefold()):
+                return t
+        return None
+
     def select(self, verdict: str | None, query: str | None, limit: int) -> list[dict[str, Any]]:
         if verdict is not None and verdict.upper() not in VERDICTS:
             raise ValueError(f"verdict must be one of {', '.join(VERDICTS)}")

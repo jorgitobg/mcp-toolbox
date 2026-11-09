@@ -4,11 +4,12 @@ A small, tested [MCP](https://modelcontextprotocol.io) server that lets an AI cl
 
 ## Current status (v0.1)
 
-One server, three read-only tools, four resources (two of them templates) and one prompt, stdio transport, built on the official Python SDK (`mcp>=1.12,<2`):
+One server, four read-only tools, five resources (three of them templates) and one prompt, stdio transport, built on the official Python SDK (`mcp>=1.12,<2`):
 
 - `search_boe(query, limit=5)`: ranked keyword search (accent-insensitive, title matches weigh 3x) with snippets and source URLs.
 - `get_boe_document(doc_id)`: metadata and paragraphs of one document; unknown ids return an MCP tool error.
 - `triage_tenders(verdict=None, query=None, limit=10)`: lists the recorded [open-tender-radar](https://github.com/jorgitobg/open-tender-radar) report (10 public TED/PLACSP tenders screened against a fictional profile on 2026-11-04) with GO / REVIEW / NO_GO and per-criterion evidence. Rule-based screening, not bid advice; evidence like "days left" is frozen at the recording date. Provenance in `src/mcp_toolbox/data/tenders/SOURCES.md`.
+- `get_tender(tender_id)`: one recorded tender with its per-criterion evidence; accepts `412026` or `PLACSP:412026`; unknown ids (or a wrong source prefix) return an MCP tool error.
 
 - Prompt `summarise_boe_document(doc_id, audience="a non-lawyer")`: a reusable template that embeds the numbered paragraphs of a bundled document and instructs the model to stay within the text and cite paragraph numbers. It only renders text; no model is called by the server. Unknown ids return an MCP error.
 
@@ -43,7 +44,7 @@ Most desktop clients read a JSON file with an `mcpServers` map (the file locatio
 }
 ```
 
-Besides the three tools, the server exposes read-only **resources** that a client can attach to a conversation without a tool call: `boe://index` (all bundled documents), `boe://document/{doc_id}` (one document, same payload as `get_boe_document`), `tenders://report` (the whole recorded tender report) and `tenders://report/{verdict}` (GO, REVIEW or NO_GO; same payload as `triage_tenders`). No subscriptions: the data are static snapshots. This snippet follows the common client convention and was not tested against a specific desktop client here; the server itself is exercised by the test-suite with the official Python MCP client over stdio.
+Besides the four tools, the server exposes read-only **resources** that a client can attach to a conversation without a tool call: `boe://index` (all bundled documents), `boe://document/{doc_id}` (one document, same payload as `get_boe_document`), `tenders://report` (the whole recorded tender report) and `tenders://report/{verdict}` (GO, REVIEW or NO_GO; same payload as `triage_tenders`) and `tenders://tender/{tender_id}` (one tender, same payload as `get_tender`). No subscriptions: the data are static snapshots. This snippet follows the common client convention and was not tested against a specific desktop client here; the server itself is exercised by the test-suite with the official Python MCP client over stdio.
 
 Development: `pip install -e '.[dev]'`, then `ruff check . && ruff format --check . && pyright && pytest` (coverage gate 85%). Only editable installs are exercised.
 
@@ -52,7 +53,7 @@ Development: `pip install -e '.[dev]'`, then `ruff check . && ruff format --chec
 The demo spawns the real server as a subprocess and talks to it with the official MCP client. Real output:
 
 ```text
-tools: get_boe_document, search_boe, triage_tenders
+tools: get_boe_document, get_tender, search_boe, triage_tenders
 search_boe('plazas Subalterno Ayuntamiento'): 3 result(s)
   BOE-A-2026-23041 score=8 Resolución de 28 de octubre de 2026, del Ayuntamiento de Torrox (Málaga), referente a la c
   BOE-A-2026-23049 score=8 Resolución de 29 de octubre de 2026, del Ayuntamiento de Borriana/Burriana (Castellón/Cast

@@ -39,6 +39,11 @@ async def run(query: str = QUERY) -> list[str]:
             lines.extend(
                 f"    {k:<9} {v['outcome']:<7} {v['evidence']}" for k, v in row["criteria"].items()
             )
+        if t["tenders"]:
+            top = t["tenders"][0]
+            one = await session.call_tool("get_tender", {"tender_id": top["id"]})
+            row = json.loads(one.content[0].text)  # type: ignore[union-attr]
+            lines.append(f"get_tender({top['id']!r}): {row['verdict']} {row['buyer'][:50]}")
     return lines
 
 
