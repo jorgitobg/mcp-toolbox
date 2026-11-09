@@ -113,9 +113,12 @@ async def test_resources_list_and_read_over_stdio() -> None:
         init = await session.initialize()
         assert init.capabilities.resources is not None
         listed = (await session.list_resources()).resources
-        assert [str(x.uri) for x in listed] == ["boe://index"]
+        assert [str(x.uri) for x in listed] == ["boe://index", "tenders://report"]
         templates = (await session.list_resource_templates()).resourceTemplates
-        assert [t.uriTemplate for t in templates] == ["boe://document/{doc_id}"]
+        assert [t.uriTemplate for t in templates] == [
+            "boe://document/{doc_id}",
+            "tenders://report/{verdict}",
+        ]
 
         index = await session.read_resource(AnyUrl("boe://index"))
         data = json.loads(index.contents[0].text)  # type: ignore[union-attr]
@@ -128,6 +131,27 @@ async def test_resources_list_and_read_over_stdio() -> None:
         assert body["id"] == "BOE-A-2026-23041" and body["paragraphs"]
         _, via_tool = await _call(session, "get_boe_document", {"doc_id": "BOE-A-2026-23041"})
         assert body == via_tool
+
+
+async def test_tender_resources_mirror_the_tool() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        await session.initialize()
+        full = await session.read_resource(AnyUrl("tenders://report"))
+        body = json.loads(full.contents[0].text)  # type: ignore[union-attr]
+        _, via_tool = await _call(session, "triage_tenders", {"limit": 20})
+        assert body == via_tool and body["count"] == 10
+
+        go = await session.read_resource(AnyUrl("tenders://report/go"))
+        go_body = json.loads(go.contents[0].text)  # type: ignore[union-attr]
+        _, go_tool = await _call(session, "triage_tenders", {"verdict": "GO"})
+        assert go_body == go_tool and 0 < go_body["count"] < 10
+
+
+async def test_tender_resource_rejects_unknown_verdict() -> None:
+    async with stdio_client(_params()) as (r, w), ClientSession(r, w) as session:
+        await session.initialize()
+        with pytest.raises(McpError):
+            await session.read_resource(AnyUrl("tenders://report/maybe"))
 
 
 async def test_unknown_resource_document_is_an_error() -> None:

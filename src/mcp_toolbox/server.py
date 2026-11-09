@@ -74,6 +74,22 @@ def build_server(search: BoeSearch | None = None, triage: TenderTriage | None = 
             raise ValueError(f"unknown document id: {doc_id!r}")
         return json.dumps({**_summary(doc), "paragraphs": list(doc.paragraphs)}, ensure_ascii=False)
 
+    @mcp.resource("tenders://report", mime_type="application/json")
+    def tenders_report() -> str:  # pyright: ignore[reportUnusedFunction]
+        """Whole recorded tender triage report (same payload as triage_tenders without filters)."""
+        rows = tenders.select(None, None, len(tenders.all()))
+        return json.dumps(
+            {"summary": tenders.summary, "count": len(rows), "tenders": rows}, ensure_ascii=False
+        )
+
+    @mcp.resource("tenders://report/{verdict}", mime_type="application/json")
+    def tenders_by_verdict(verdict: str) -> str:  # pyright: ignore[reportUnusedFunction]
+        """Recorded tenders with one verdict (GO, REVIEW or NO_GO)."""
+        rows = tenders.select(verdict, None, len(tenders.all()))
+        return json.dumps(
+            {"summary": tenders.summary, "count": len(rows), "tenders": rows}, ensure_ascii=False
+        )
+
     @mcp.prompt(title="Summarise a BOE document")
     def summarise_boe_document(doc_id: str, audience: str = "a non-lawyer") -> str:  # pyright: ignore[reportUnusedFunction]
         """Prompt template: summarise one bundled BOE document for a given audience."""
