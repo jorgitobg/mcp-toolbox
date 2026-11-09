@@ -1,4 +1,4 @@
-"""MCP server (stdio) exposing two read-only BOE tools over the bundled offline corpus."""
+"""MCP server (stdio) exposing read-only BOE and tender tools over the bundled offline corpus."""
 
 from __future__ import annotations
 
@@ -60,6 +60,17 @@ def build_server(search: BoeSearch | None = None, triage: TenderTriage | None = 
         rows = tenders.select(verdict, query, min(max(limit, 1), MAX_LIMIT))
         return {"summary": tenders.summary, "count": len(rows), "tenders": rows}
 
+    @mcp.tool()
+    def get_tender(tender_id: str) -> dict[str, Any]:  # pyright: ignore[reportUnusedFunction]
+        """Return one recorded tender with its per-criterion evidence, by id.
+
+        Accepts a bare id ('412026') or 'SOURCE:id' ('PLACSP:412026'). Offline, read-only.
+        """
+        row = tenders.get(tender_id)
+        if row is None:
+            raise ValueError(f"unknown tender id: {tender_id!r}")
+        return row
+
     @mcp.resource("boe://index", mime_type="application/json")
     def boe_index() -> str:  # pyright: ignore[reportUnusedFunction]
         """Index of every bundled BOE document (id, title, department, date, URL)."""
@@ -89,6 +100,14 @@ def build_server(search: BoeSearch | None = None, triage: TenderTriage | None = 
         return json.dumps(
             {"summary": tenders.summary, "count": len(rows), "tenders": rows}, ensure_ascii=False
         )
+
+    @mcp.resource("tenders://tender/{tender_id}", mime_type="application/json")
+    def tender_by_id(tender_id: str) -> str:  # pyright: ignore[reportUnusedFunction]
+        """One recorded tender (same payload as get_tender), readable without a tool call."""
+        row = tenders.get(tender_id)
+        if row is None:
+            raise ValueError(f"unknown tender id: {tender_id!r}")
+        return json.dumps(row, ensure_ascii=False)
 
     @mcp.prompt(title="Summarise a BOE document")
     def summarise_boe_document(doc_id: str, audience: str = "a non-lawyer") -> str:  # pyright: ignore[reportUnusedFunction]
