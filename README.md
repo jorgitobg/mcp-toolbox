@@ -46,7 +46,7 @@ Most desktop clients read a JSON file with an `mcpServers` map (the file locatio
 
 Besides the four tools, the server exposes read-only **resources** that a client can attach to a conversation without a tool call: `boe://index` (all bundled documents), `boe://document/{doc_id}` (one document, same payload as `get_boe_document`), `tenders://report` (the whole recorded tender report) and `tenders://report/{verdict}` (GO, REVIEW or NO_GO; same payload as `triage_tenders`) and `tenders://tender/{tender_id}` (one tender, same payload as `get_tender`). No subscriptions: the data are static snapshots. This snippet follows the common client convention and was not tested against a specific desktop client here; the server itself is exercised by the test-suite with the official Python MCP client over stdio.
 
-Development: `pip install -e '.[dev]'`, then `ruff check . && ruff format --check . && pyright && pytest` (coverage gate 85%). Only editable installs are exercised.
+Development: `pip install -e '.[dev]'`, then `ruff check . && ruff format --check . && pyright && pytest` (coverage gate 85%). `scripts/verify_wheel.py` checks the artifact rather than the checkout: CI builds the wheel, installs it into a clean virtualenv outside the repository and drives the installed `mcp-toolbox` console script over stdio, which fails if the bundled corpora did not make it into the package.
 
 ## Demo output
 
