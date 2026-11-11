@@ -33,3 +33,23 @@ jobs:
           echo "${GITLEAKS_SHA256}  gitleaks.tgz" | sha256sum -c -
           tar -xzf gitleaks.tgz gitleaks
           ./gitleaks detect --source . --redact --no-banner --exit-code 1
+  package:
+    # An editable install proves nothing about the artifact users get: code can package
+    # fine while the bundled corpora stay behind. Build the wheel, install it somewhere
+    # outside the checkout and drive the installed console script.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheel and sdist
+        run: python -m pip wheel . -w dist --no-deps
+      - name: Install the wheel into a clean virtualenv
+        run: |
+          python -m venv "${RUNNER_TEMP}/wheel-venv"
+          "${RUNNER_TEMP}/wheel-venv/bin/python" -m pip install dist/*.whl
+      - name: Verify the installed package (offline corpora and stdio)
+        run: |
+          cd "${RUNNER_TEMP}"
+          "${RUNNER_TEMP}/wheel-venv/bin/python" "${GITHUB_WORKSPACE}/scripts/verify_wheel.py"
