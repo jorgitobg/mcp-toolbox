@@ -76,7 +76,7 @@ Hexagonal: `domain/` (models, `DocumentSource` port), `application/search.py`, `
 - Keyword counting only: no stemming, phrases or semantics.
 - Static snapshots (11 BOE documents, one tender report); no live BOE, TED or PLACSP access, and the tender report is a copy, not a live call into open-tender-radar.
 - stdio only; no HTTP transport or auth.
-- `mcp` 2.x is not supported yet (API renamed); pinned below 2. A throwaway run of the tests against 2.3.0 passed after mechanical renames, see [ADR 0003](docs/adr/0003-mcp-2x-migration-evaluation.md).
+- `mcp` 2.x is not supported; pinned below 2. Measured on 2.3.0 ([ADR 0004](docs/adr/0004-mcp-2x-compatibility-measured.md)): the suite (after renames and one adapted in-process test), demo and wheel pass, but error messages for unknown ids and invalid verdicts lose their reason text for clients. Earlier notes in [ADR 0003](docs/adr/0003-mcp-2x-migration-evaluation.md).
 
 ## Licence
 

@@ -1,6 +1,6 @@
 # ADR 0003: mcp 2.x migration evaluated, not adopted yet
 
-Status: accepted (2026-11-07)
+Status: accepted (2026-11-07); measured in more detail in [ADR 0004](0004-mcp-2x-compatibility-measured.md)
 
 ## Context
 The package pins `mcp>=1.12,<2`. The official SDK now ships 2.x (2.3.0 tried).
